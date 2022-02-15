@@ -1,2 +1,3 @@
-gyakorlatok/*/*.exe
-gyakorlatok/*/assets/**
+gyakorlatok/**/bin/**
+gyakorlatok/**/*.exe
+gyakorlatok/**/assets/**
