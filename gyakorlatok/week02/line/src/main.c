@@ -219,8 +219,6 @@ void drawRect(SDL_Renderer* renderer,
   }
 }
 
-void drawRect();
-
 void setDrawColor(SDL_Renderer* renderer, Color color) {
   SDL_SetRenderDrawColor(
     renderer, color.red, color.green, color.blue, SDL_ALPHA_OPAQUE);
