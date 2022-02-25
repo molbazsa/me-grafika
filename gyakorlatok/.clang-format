@@ -1,8 +1,12 @@
 IndentWidth: 2
-ContinuationIndentWidth: 2
+
 DerivePointerAlignment: false
 PointerAlignment: Left
+
 IndentCaseLabels: true
 AllowShortFunctionsOnASingleLine: Empty
 SortIncludes: false
-AlignAfterOpenBracket: DontAlign
+
+BinPackArguments: false
+BinPackParameters: false
+ContinuationIndentWidth: 2
