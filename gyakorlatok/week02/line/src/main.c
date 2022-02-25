@@ -150,7 +150,7 @@ void handleMouseClick(SDL_Renderer* renderer,
   } else if (isInToolbox(button_event.x, button_event.y, palette_length)) {
     puts("Click was in toolbox");
     *tool = toolboxTool(button_event.x, *tool, palette_length);
-    printf("Tool is now Tool %d", *tool);
+    printf("Tool is now Tool %d\n", *tool);
     *shape_started = false;
   } else {
     switch (*tool) {
@@ -211,7 +211,7 @@ void drawRect(SDL_Renderer* renderer,
                      line->endY - line->startY};
     SDL_RenderFillRect(renderer, &rect);
     SDL_RenderPresent(renderer);
-    printf("Line drawn from (%d, %d) to (%d, %d)\n",
+    printf("Rectangle drawn from (%d, %d) to (%d, %d)\n",
            line->startX,
            line->startY,
            line->endX,
