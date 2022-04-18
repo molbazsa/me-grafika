@@ -1,3 +1,7 @@
+feladat/**/bin/**
+feladat/**/*.exe
+feladat/**/assets/**
+
 gyakorlatok/**/bin/**
 gyakorlatok/**/*.exe
 gyakorlatok/**/assets/**
