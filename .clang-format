@@ -10,3 +10,5 @@ SortIncludes: false
 BinPackArguments: false
 BinPackParameters: false
 ContinuationIndentWidth: 2
+
+SpaceAfterCStyleCast: true
