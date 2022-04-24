@@ -8,7 +8,7 @@
 
 void init_scene(Scene* scene) {
   load_model(&(scene->book.model), "assets/models/cube.obj");
-  scene->book.texture_id = load_texture("assets/textures/dino.jpg");
+  scene->book.texture_id = load_texture("assets/textures/cube.png");
 
   scene->book.material.ambient.red = 1.0;
   scene->book.material.ambient.green = 1.0;
@@ -48,6 +48,19 @@ void init_scene(Scene* scene) {
   scene->cube.position.x = 1;
   scene->cube.position.y = 0;
   scene->cube.position.z = 0;
+
+  scene->page.position.x = 0;
+  scene->page.position.y = 0;
+  scene->page.position.z = 0;
+
+  scene->page.height = 8;
+  scene->page.flatness = 1;
+  scene->page.rotation = 0;
+
+  scene->page.is_turning = false;
+
+  scene->n_pages = 1;
+  scene->pages_turned = 0;
 }
 
 void set_lighting() {
@@ -79,8 +92,17 @@ void set_material(const Material* material) {
   glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &(material->shininess));
 }
 
-void update_scene(Scene* scene) {
-  (void) scene;
+void update_scene(Scene* scene, double time) {
+  double const TURN_SPEED = 1.1;
+
+  if (scene->page.is_turning) {
+    if (scene->page.rotation <= -90) {
+      scene->page.is_turning = false;
+      scene->pages_turned++;
+    }
+    scene->page.rotation -= 90 * TURN_SPEED * time;
+    scene->page.flatness -= TURN_SPEED * time;
+  }
 }
 
 void render_scene(const Scene* scene) {
@@ -91,7 +113,7 @@ void render_scene(const Scene* scene) {
   render_object(&(scene->book));
   // render_object(&(scene->cube));
 
-  render_paper();
+  render_paper(&(scene->page));
 }
 
 void render_object(const WorldObject* object) {
@@ -105,54 +127,78 @@ void render_object(const WorldObject* object) {
   glPopMatrix();
 }
 
-void render_paper() {
+void render_paper(const Page* page) {
   float t;
   float delta;
 
-  float bottom = -2.5f;
-  float top = 2.5f;
+  float bottom = -page->height / 2;
+  float top = page->height / 2;
+
+  vec3 curve;
 
   glDisable(GL_TEXTURE_2D);
+
+  curve = paper_curve(M_PI);
+  glPushMatrix();
+  glTranslatef(-curve.x + 0.009, 0, 0.01);
+  glRotatef(page->rotation, 0, 1, 0);
+  glTranslatef(page->position.x, page->position.y, page->position.z);
 
   glBegin(GL_QUAD_STRIP);
 
   glColor3f(1, 1, 1);
 
   t = 0.04f;
-  vec3 curve = paper_curve(t);
-  glVertex3f(curve.x, bottom, curve.z);
-  glVertex3f(curve.x, top, curve.z);
+  curve = paper_curve(t);
+  glVertex3f(curve.x, bottom, page->flatness * curve.z);
+  glVertex3f(curve.x, top, page->flatness * curve.z);
 
   delta = 0.001f;
 
   while (t < 0.2) {
     t += delta;
-    vec3 curve = paper_curve(t);
-    glVertex3f(curve.x, bottom, curve.z);
-    glVertex3f(curve.x, top, curve.z);
+    curve = paper_curve(t);
+    glVertex3f(curve.x, bottom, page->flatness * curve.z);
+    glVertex3f(curve.x, top, page->flatness * curve.z);
   }
 
   delta = 0.01f;
 
   while (t < 1.5) {
     t += delta;
-    vec3 curve = paper_curve(t);
-    glVertex3f(curve.x, bottom, curve.z);
-    glVertex3f(curve.x, top, curve.z);
+    curve = paper_curve(t);
+    glVertex3f(curve.x, bottom, page->flatness * curve.z);
+    glVertex3f(curve.x, top, page->flatness * curve.z);
   }
 
   delta = 0.04f;
 
   while (t < M_PI) {
     t += delta;
-    vec3 curve = paper_curve(t);
-    glVertex3f(curve.x, bottom, curve.z);
-    glVertex3f(curve.x, top, curve.z);
+    curve = paper_curve(t);
+    glVertex3f(curve.x, bottom, page->flatness * curve.z);
+    glVertex3f(curve.x, top, page->flatness * curve.z);
   }
 
   glEnd();
 
+  glPopMatrix();
+
   glEnable(GL_TEXTURE_2D);
+}
+
+void turn_page(Scene* scene) {
+  if (!(scene->page.is_turning) && scene->pages_turned < scene->n_pages) {
+    scene->page.is_turning = true;
+  }
+}
+
+void turn_page_back(Scene* scene) {
+  if (!(scene->page.is_turning) && scene->pages_turned > 0) {
+    scene->page.rotation = 0;
+    scene->page.flatness = 1;
+    scene->pages_turned--;
+  }
 }
 
 vec3 paper_curve(float t) {

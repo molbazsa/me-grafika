@@ -6,6 +6,8 @@
 
 #include <obj/model.h>
 
+#include <stdlib.h>
+
 typedef struct WorldObject {
   Model model;
   vec3 position;
@@ -13,8 +15,19 @@ typedef struct WorldObject {
   GLuint texture_id;
 } WorldObject;
 
+typedef struct Page {
+  vec3 position;
+  float height;
+  float flatness;
+  float rotation;
+  bool is_turning;
+} Page;
+
 typedef struct Scene {
   WorldObject book;
+  Page page;
+  size_t n_pages;
+  size_t pages_turned;
   WorldObject cube;
 } Scene;
 
@@ -36,7 +49,7 @@ void set_material(const Material* material);
 /**
  * Update the scene.
  */
-void update_scene(Scene* scene);
+void update_scene(Scene* scene, double time);
 
 /**
  * Render the scene.
@@ -51,7 +64,17 @@ void render_object(const WorldObject* object);
 /**
  * Render the paper for the book.
  */
-void render_paper();
+void render_paper(const Page* page);
+
+/**
+ * Turn the page for the book.
+ */
+void turn_page(Scene* scene);
+
+/**
+ * Turn back the page for the book.
+ */
+void turn_page_back(Scene* scene);
 
 /**
  * Calculate the coordinates of the paper's curve.

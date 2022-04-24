@@ -127,11 +127,17 @@ void handle_app_events(App* app) {
           case SDL_SCANCODE_D:
             set_camera_side_speed(&(app->camera), -1);
             break;
-          case SDL_SCANCODE_U:
+          case SDL_SCANCODE_SPACE:
             set_camera_vertical_speed(&(app->camera), 1);
             break;
-          case SDL_SCANCODE_J:
+          case SDL_SCANCODE_LSHIFT:
             set_camera_vertical_speed(&(app->camera), -1);
+            break;
+          case SDL_SCANCODE_T:
+            turn_page(&(app->scene));
+            break;
+          case SDL_SCANCODE_B:
+            turn_page_back(&(app->scene));
             break;
           default:
             break;
@@ -147,8 +153,8 @@ void handle_app_events(App* app) {
           case SDL_SCANCODE_D:
             set_camera_side_speed(&(app->camera), 0);
             break;
-          case SDL_SCANCODE_U:
-          case SDL_SCANCODE_J:
+          case SDL_SCANCODE_SPACE:
+          case SDL_SCANCODE_LSHIFT:
             set_camera_vertical_speed(&(app->camera), 0);
             break;
           default:
@@ -195,7 +201,7 @@ void update_app(App* app) {
   app->uptime = current_time;
 
   update_camera(&(app->camera), elapsed_time);
-  update_scene(&(app->scene));
+  update_scene(&(app->scene), elapsed_time);
 }
 
 void render_app(App* app) {
