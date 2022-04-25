@@ -7,8 +7,8 @@
 #include <math.h>
 
 void init_scene(Scene* scene) {
-  load_model(&(scene->book.model), "assets/models/cube.obj");
-  scene->book.texture_id = load_texture("assets/textures/cube.png");
+  load_model(&(scene->book.model), "assets/models/book.obj");
+  scene->book.texture_id = load_texture("assets/textures/dino.jpg");
 
   scene->book.material.ambient.red = 1.0;
   scene->book.material.ambient.green = 1.0;
@@ -24,9 +24,13 @@ void init_scene(Scene* scene) {
 
   scene->book.material.shininess = 0.0;
 
-  scene->book.position.x = -2;
+  scene->book.position.x = 0;
   scene->book.position.y = 0;
   scene->book.position.z = 0;
+
+  scene->book.rotation.x = -90;
+  scene->book.rotation.y = 0;
+  scene->book.rotation.z = 0;
 
   load_model(&(scene->cube.model), "assets/models/cube.obj");
   scene->cube.texture_id = load_texture("assets/textures/dino_inv.jpg");
@@ -49,11 +53,16 @@ void init_scene(Scene* scene) {
   scene->cube.position.y = 0;
   scene->cube.position.z = 0;
 
+  scene->cube.rotation.x = 0;
+  scene->cube.rotation.y = 0;
+  scene->cube.rotation.z = 0;
+
   scene->page.position.x = 0;
   scene->page.position.y = 0;
   scene->page.position.z = 0;
 
-  scene->page.height = 8;
+  scene->page.height = 0.7;
+  scene->page.width = 0.47;
   scene->page.flatness = 1;
   scene->page.rotation = 0;
 
@@ -93,15 +102,18 @@ void set_material(const Material* material) {
 }
 
 void update_scene(Scene* scene, double time) {
-  double const TURN_SPEED = 1.1;
+  double const TURN_SPEED = 2;
 
   if (scene->page.is_turning) {
-    if (scene->page.rotation <= -90) {
+    if (scene->page.rotation >= 180) {
+      scene->page.rotation = 180;
+      scene->page.flatness = -1;
       scene->page.is_turning = false;
       scene->pages_turned++;
+    } else {
+      scene->page.rotation += 180 * TURN_SPEED * time;
+      scene->page.flatness -= 2 * TURN_SPEED * time;
     }
-    scene->page.rotation -= 90 * TURN_SPEED * time;
-    scene->page.flatness -= TURN_SPEED * time;
   }
 }
 
@@ -120,6 +132,9 @@ void render_object(const WorldObject* object) {
   glPushMatrix();
 
   glTranslatef(object->position.x, object->position.y, object->position.z);
+  glRotatef(object->rotation.x, -1, 0, 0);
+  glRotatef(object->rotation.y, 0, -1, 0);
+  glRotatef(object->rotation.z, 0, 0, -1);
   glBindTexture(GL_TEXTURE_2D, object->texture_id);
   set_material(&(object->material));
   draw_model(&(object->model));
@@ -135,14 +150,21 @@ void render_paper(const Page* page) {
   float top = page->height / 2;
 
   vec3 curve;
+  vec3 curve_start;
+  vec3 curve_end;
 
   glDisable(GL_TEXTURE_2D);
 
-  curve = paper_curve(M_PI);
+  t = 0.04f;
+  curve_start = paper_curve(t);
+  curve_end = paper_curve(M_PI);
   glPushMatrix();
-  glTranslatef(-curve.x + 0.009, 0, 0.01);
-  glRotatef(page->rotation, 0, 1, 0);
   glTranslatef(page->position.x, page->position.y, page->position.z);
+  glRotatef(page->rotation, 0, -1, 0);
+  glScalef(page->width / (curve_start.x - curve_end.x),
+           1,
+           page->width / (curve_start.x - curve_end.x));
+  glTranslatef(-curve_end.x + 0.009, 0, 0.01);
 
   glBegin(GL_QUAD_STRIP);
 

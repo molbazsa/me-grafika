@@ -11,6 +11,7 @@
 typedef struct WorldObject {
   Model model;
   vec3 position;
+  vec3 rotation;
   Material material;
   GLuint texture_id;
 } WorldObject;
@@ -18,6 +19,7 @@ typedef struct WorldObject {
 typedef struct Page {
   vec3 position;
   float height;
+  float width;
   float flatness;
   float rotation;
   bool is_turning;
