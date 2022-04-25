@@ -12,16 +12,13 @@ typedef struct WorldObject {
   Model model;
   vec3 position;
   vec3 rotation;
+  vec3 scale;
   Material material;
   GLuint texture_id;
 } WorldObject;
 
 typedef struct Page {
-  vec3 position;
-  float height;
-  float width;
-  float flatness;
-  float rotation;
+  WorldObject object;
   bool is_turning;
 } Page;
 
@@ -30,7 +27,6 @@ typedef struct Scene {
   Page page;
   size_t n_pages;
   size_t pages_turned;
-  WorldObject cube;
 } Scene;
 
 /**
@@ -64,9 +60,9 @@ void render_scene(const Scene* scene);
 void render_object(const WorldObject* object);
 
 /**
- * Render the paper for the book.
+ * Render the top page for the book.
  */
-void render_paper(const Page* page);
+void render_page(const Page* page);
 
 /**
  * Turn the page for the book.
@@ -77,11 +73,6 @@ void turn_page(Scene* scene);
  * Turn back the page for the book.
  */
 void turn_page_back(Scene* scene);
-
-/**
- * Calculate the coordinates of the paper's curve.
- */
-vec3 paper_curve(float t);
 
 /**
  * Draw the axes of the world coordinate system.
