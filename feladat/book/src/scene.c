@@ -24,6 +24,10 @@ void init_scene(Scene* scene) {
 
   scene->book.material.shininess = 0.0;
 
+  scene->book.orientation.x = 0;
+  scene->book.orientation.y = 0;
+  scene->book.orientation.z = 0;
+
   scene->book.position.x = 0;
   scene->book.position.y = 0;
   scene->book.position.z = 0;
@@ -37,7 +41,7 @@ void init_scene(Scene* scene) {
   scene->book.scale.z = 1;
 
   load_model(&(scene->page.object.model), "assets/models/page.obj");
-  scene->page.object.texture_id = load_texture("assets/textures/dino_inv.jpg");
+  scene->page.object.texture_id = load_texture("assets/textures/dino.jpg");
 
   scene->page.object.material.ambient.red = 1.0;
   scene->page.object.material.ambient.green = 1.0;
@@ -54,10 +58,14 @@ void init_scene(Scene* scene) {
   scene->page.object.material.shininess = 0.0;
 
   scene->page.object.position.x = 0;
-  scene->page.object.position.y = 1;
+  scene->page.object.position.y = 0;
   scene->page.object.position.z = 0;
 
-  scene->page.object.rotation.x = -90;
+  scene->page.object.orientation.x = -90;
+  scene->page.object.orientation.y = 0;
+  scene->page.object.orientation.z = 0;
+
+  scene->page.object.rotation.x = 0;
   scene->page.object.rotation.y = 0;
   scene->page.object.rotation.z = 0;
 
@@ -65,7 +73,7 @@ void init_scene(Scene* scene) {
   scene->page.object.scale.y = 1;
   scene->page.object.scale.z = 1;
 
-  scene->page.is_turning = false;
+  scene->page.turn_direction = 0;
 
   scene->n_pages = 1;
   scene->pages_turned = 0;
@@ -103,15 +111,25 @@ void set_material(const Material* material) {
 void update_scene(Scene* scene, double time) {
   double const TURN_SPEED = 2;
 
-  if (scene->page.is_turning) {
+  if (scene->page.turn_direction == 1) {
     if (scene->page.object.rotation.y >= 180) {
       scene->page.object.rotation.y = 180;
       scene->page.object.scale.z = -1;
-      scene->page.is_turning = false;
+      scene->page.turn_direction = 0;
       scene->pages_turned++;
     } else {
       scene->page.object.rotation.y += 180 * TURN_SPEED * time;
       scene->page.object.scale.z -= 2 * TURN_SPEED * time;
+    }
+  } else if (scene->page.turn_direction == -1) {
+    if (scene->page.object.rotation.y <= 0) {
+      scene->page.object.rotation.y = 0;
+      scene->page.object.scale.z = 1;
+      scene->page.turn_direction = 0;
+      scene->pages_turned--;
+    } else {
+      scene->page.object.rotation.y -= 180 * TURN_SPEED * time;
+      scene->page.object.scale.z += 2 * TURN_SPEED * time;
     }
   }
 }
@@ -129,10 +147,13 @@ void render_object(const WorldObject* object) {
   glPushMatrix();
 
   glTranslatef(object->position.x, object->position.y, object->position.z);
-  glScalef(object->scale.x, object->scale.y, object->scale.z);
   glRotatef(object->rotation.z, 0, 0, -1);
   glRotatef(object->rotation.y, 0, -1, 0);
   glRotatef(object->rotation.x, -1, 0, 0);
+  glScalef(object->scale.x, object->scale.y, object->scale.z);
+  glRotatef(object->orientation.z, 0, 0, -1);
+  glRotatef(object->orientation.y, 0, -1, 0);
+  glRotatef(object->orientation.x, -1, 0, 0);
   glBindTexture(GL_TEXTURE_2D, object->texture_id);
   set_material(&(object->material));
   draw_model(&(object->model));
@@ -141,16 +162,14 @@ void render_object(const WorldObject* object) {
 }
 
 void turn_page(Scene* scene) {
-  if (!(scene->page.is_turning) && scene->pages_turned < scene->n_pages) {
-    scene->page.is_turning = true;
+  if (scene->page.turn_direction == 0 && scene->pages_turned < scene->n_pages) {
+    scene->page.turn_direction = 1;
   }
 }
 
 void turn_page_back(Scene* scene) {
-  if (!(scene->page.is_turning) && scene->pages_turned > 0) {
-    scene->page.object.rotation.y = 0;
-    scene->page.object.scale.z = 1;
-    scene->pages_turned--;
+  if (scene->page.turn_direction == 0 && scene->pages_turned > 0) {
+    scene->page.turn_direction = -1;
   }
 }
 

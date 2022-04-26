@@ -11,6 +11,7 @@
 typedef struct WorldObject {
   Model model;
   vec3 position;
+  vec3 orientation;
   vec3 rotation;
   vec3 scale;
   Material material;
@@ -19,7 +20,7 @@ typedef struct WorldObject {
 
 typedef struct Page {
   WorldObject object;
-  bool is_turning;
+  int turn_direction;
 } Page;
 
 typedef struct Scene {
