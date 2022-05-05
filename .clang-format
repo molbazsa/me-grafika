@@ -1,4 +1,4 @@
-IndentWidth: 2
+IndentWidth: 4
 
 DerivePointerAlignment: false
 PointerAlignment: Left
@@ -9,6 +9,6 @@ SortIncludes: false
 
 BinPackArguments: false
 BinPackParameters: false
-ContinuationIndentWidth: 2
+ContinuationIndentWidth: 4
 
 SpaceAfterCStyleCast: true
