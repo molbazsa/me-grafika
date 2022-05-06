@@ -41,9 +41,15 @@ void init_scene(Scene* scene) {
     scene->book.scale.y = 1;
     scene->book.scale.z = 1;
 
+    scene->n_pages = 3;
+    scene->pages_turned = 0;
+
+    scene->drawing_textures = malloc((scene->n_pages + 2) * sizeof(GLuint));
+    for (size_t i = 0; i < scene->n_pages + 2; i++) {
+        scene->drawing_textures[i] = load_texture("assets/textures/page.jpg");
+    }
+
     load_model(&(scene->left_page.object.model), "assets/models/page.obj");
-    scene->left_page.object.texture_id =
-        load_texture("assets/textures/page.jpg");
 
     scene->left_page.object.material.ambient.red = 1.0;
     scene->left_page.object.material.ambient.green = 1.0;
@@ -77,9 +83,41 @@ void init_scene(Scene* scene) {
 
     scene->left_page.turn_direction = 0;
 
+    load_model(&(scene->turning_page.object.model), "assets/models/page.obj");
+
+    scene->turning_page.object.material.ambient.red = 1.0;
+    scene->turning_page.object.material.ambient.green = 1.0;
+    scene->turning_page.object.material.ambient.blue = 1.0;
+
+    scene->turning_page.object.material.diffuse.red = 1.0;
+    scene->turning_page.object.material.diffuse.green = 1.0;
+    scene->turning_page.object.material.diffuse.blue = 1.0;
+
+    scene->turning_page.object.material.specular.red = 0.0;
+    scene->turning_page.object.material.specular.green = 0.0;
+    scene->turning_page.object.material.specular.blue = 0.0;
+
+    scene->turning_page.object.material.shininess = 0.0;
+
+    scene->turning_page.object.position.x = 0;
+    scene->turning_page.object.position.y = 0;
+    scene->turning_page.object.position.z = 0;
+
+    scene->turning_page.object.orientation.x = -90;
+    scene->turning_page.object.orientation.y = 0;
+    scene->turning_page.object.orientation.z = 0;
+
+    scene->turning_page.object.rotation.x = 0;
+    scene->turning_page.object.rotation.y = 0;
+    scene->turning_page.object.rotation.z = 0;
+
+    scene->turning_page.object.scale.x = 1;
+    scene->turning_page.object.scale.y = 1;
+    scene->turning_page.object.scale.z = 1;
+
+    scene->turning_page.turn_direction = 0;
+
     load_model(&(scene->right_page.object.model), "assets/models/page.obj");
-    scene->right_page.object.texture_id =
-        load_texture("assets/textures/page.jpg");
 
     scene->right_page.object.material.ambient.red = 1.0;
     scene->right_page.object.material.ambient.green = 1.0;
@@ -113,8 +151,14 @@ void init_scene(Scene* scene) {
 
     scene->right_page.turn_direction = 0;
 
-    scene->n_pages = 1;
-    scene->pages_turned = 0;
+    scene->left_page.object.texture_id =
+        scene->drawing_textures[scene->pages_turned];
+
+    scene->turning_page.object.texture_id =
+        scene->drawing_textures[scene->pages_turned + 1];
+
+    scene->right_page.object.texture_id =
+        scene->drawing_textures[scene->pages_turned + 1];
 
     scene->dot = IMG_Load("assets/textures/dot.jpg");
 }
@@ -152,25 +196,23 @@ void set_material(const Material* material) {
 void update_scene(Scene* scene, double time) {
     double const TURN_SPEED = 2;
 
-    if (scene->right_page.turn_direction == 1) {
-        if (scene->right_page.object.rotation.y >= 180) {
-            scene->right_page.object.rotation.y = 180;
-            scene->right_page.object.scale.z = -1;
-            scene->right_page.turn_direction = 0;
+    if (scene->turning_page.turn_direction == 1) {
+        scene->turning_page.object.rotation.y += 180 * TURN_SPEED * time;
+        scene->turning_page.object.scale.z -= 2 * TURN_SPEED * time;
+        if (scene->turning_page.object.rotation.y >= 180) {
+            scene->turning_page.turn_direction = 0;
             scene->pages_turned++;
-        } else {
-            scene->right_page.object.rotation.y += 180 * TURN_SPEED * time;
-            scene->right_page.object.scale.z -= 2 * TURN_SPEED * time;
+            scene->left_page.object.texture_id =
+                scene->drawing_textures[scene->pages_turned];
         }
-    } else if (scene->right_page.turn_direction == -1) {
-        if (scene->right_page.object.rotation.y <= 0) {
-            scene->right_page.object.rotation.y = 0;
-            scene->right_page.object.scale.z = 1;
-            scene->right_page.turn_direction = 0;
+    } else if (scene->turning_page.turn_direction == -1) {
+        scene->turning_page.object.rotation.y -= 180 * TURN_SPEED * time;
+        scene->turning_page.object.scale.z += 2 * TURN_SPEED * time;
+        if (scene->turning_page.object.rotation.y <= 0) {
+            scene->turning_page.turn_direction = 0;
             scene->pages_turned--;
-        } else {
-            scene->right_page.object.rotation.y -= 180 * TURN_SPEED * time;
-            scene->right_page.object.scale.z += 2 * TURN_SPEED * time;
+            scene->right_page.object.texture_id =
+                scene->drawing_textures[scene->pages_turned + 1];
         }
     }
 }
@@ -181,8 +223,7 @@ void render_scene(const Scene* scene) {
     draw_axes();
 
     // render_object(&(scene->book));
-    render_object(&(scene->left_page.object));
-    render_object(&(scene->right_page.object));
+    render_pages(scene);
 }
 
 void render_object(const WorldObject* object) {
@@ -203,18 +244,36 @@ void render_object(const WorldObject* object) {
     glPopMatrix();
 }
 
-void render_pages(const Scene* scene) {}
+void render_pages(const Scene* scene) {
+    if (scene->turning_page.turn_direction != 0) {
+        render_object(&(scene->turning_page.object));
+    }
+    render_object(&(scene->left_page.object));
+    render_object(&(scene->right_page.object));
+}
 
 void turn_page(Scene* scene) {
-    if (scene->right_page.turn_direction == 0 &&
+    if (scene->turning_page.turn_direction == 0 &&
         scene->pages_turned < scene->n_pages) {
-        scene->right_page.turn_direction = 1;
+        scene->turning_page.object.rotation.y = 0;
+        scene->turning_page.object.scale.z = 1;
+        scene->turning_page.turn_direction = 1;
+        scene->turning_page.object.texture_id =
+            scene->drawing_textures[scene->pages_turned + 1];
+        scene->right_page.object.texture_id =
+            scene->drawing_textures[scene->pages_turned + 2];
     }
 }
 
 void turn_page_back(Scene* scene) {
-    if (scene->right_page.turn_direction == 0 && scene->pages_turned > 0) {
-        scene->right_page.turn_direction = -1;
+    if (scene->turning_page.turn_direction == 0 && scene->pages_turned > 0) {
+        scene->turning_page.object.rotation.y = 180;
+        scene->turning_page.object.scale.z = -1;
+        scene->turning_page.turn_direction = -1;
+        scene->left_page.object.texture_id =
+            scene->drawing_textures[scene->pages_turned - 1];
+        scene->turning_page.object.texture_id =
+            scene->drawing_textures[scene->pages_turned];
     }
 }
 
@@ -243,5 +302,6 @@ void draw_axes() {
 }
 
 void destroy_scene(Scene* scene) {
+    free(scene->drawing_textures);
     SDL_FreeSurface(scene->dot);
 }

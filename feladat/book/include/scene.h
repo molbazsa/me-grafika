@@ -21,13 +21,13 @@ typedef struct WorldObject {
 
 typedef struct Page {
     WorldObject object;
-    GLuint blank_texture;
     int turn_direction;
 } Page;
 
 typedef struct Scene {
     WorldObject book;
     Page left_page;
+    Page turning_page;
     Page right_page;
     size_t n_pages;
     size_t pages_turned;
