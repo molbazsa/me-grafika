@@ -25,7 +25,9 @@ typedef struct Page {
 } Page;
 
 typedef struct Scene {
-    WorldObject book;
+    WorldObject desk;
+    WorldObject cover;
+    WorldObject pages;
     Page left_page;
     Page turning_page;
     Page right_page;

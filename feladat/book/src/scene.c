@@ -8,38 +8,104 @@
 #include <math.h>
 
 void init_scene(Scene* scene) {
-    load_model(&(scene->book.model), "assets/models/book.obj");
-    scene->book.texture_id = load_texture("assets/textures/dino.jpg");
+    load_model(&(scene->desk.model), "assets/models/desk.obj");
+    scene->desk.texture_id = load_texture("assets/textures/desk.jpg");
 
-    scene->book.material.ambient.red = 1.0;
-    scene->book.material.ambient.green = 1.0;
-    scene->book.material.ambient.blue = 1.0;
+    scene->desk.material.ambient.red = 1.0;
+    scene->desk.material.ambient.green = 1.0;
+    scene->desk.material.ambient.blue = 1.0;
 
-    scene->book.material.diffuse.red = 1.0;
-    scene->book.material.diffuse.green = 1.0;
-    scene->book.material.diffuse.blue = 1.0;
+    scene->desk.material.diffuse.red = 1.0;
+    scene->desk.material.diffuse.green = 1.0;
+    scene->desk.material.diffuse.blue = 1.0;
 
-    scene->book.material.specular.red = 0.0;
-    scene->book.material.specular.green = 0.0;
-    scene->book.material.specular.blue = 0.0;
+    scene->desk.material.specular.red = 0.0;
+    scene->desk.material.specular.green = 0.0;
+    scene->desk.material.specular.blue = 0.0;
 
-    scene->book.material.shininess = 0.0;
+    scene->desk.material.shininess = 0.0;
 
-    scene->book.orientation.x = 0;
-    scene->book.orientation.y = 0;
-    scene->book.orientation.z = 0;
+    scene->desk.orientation.x = 0;
+    scene->desk.orientation.y = 0;
+    scene->desk.orientation.z = 0;
 
-    scene->book.position.x = 0;
-    scene->book.position.y = 0;
-    scene->book.position.z = 0;
+    scene->desk.position.x = 0;
+    scene->desk.position.y = 0;
+    scene->desk.position.z = -0.055;
 
-    scene->book.rotation.x = -90;
-    scene->book.rotation.y = 0;
-    scene->book.rotation.z = 0;
+    scene->desk.rotation.x = 180;
+    scene->desk.rotation.y = 0;
+    scene->desk.rotation.z = 0;
 
-    scene->book.scale.x = 1;
-    scene->book.scale.y = 1;
-    scene->book.scale.z = 1;
+    scene->desk.scale.x = 0.4;
+    scene->desk.scale.y = 0.4;
+    scene->desk.scale.z = 0.4;
+
+    load_model(&(scene->cover.model), "assets/models/cover.obj");
+    scene->cover.texture_id = load_texture("assets/textures/leather2.jpg");
+
+    scene->cover.material.ambient.red = 1.0;
+    scene->cover.material.ambient.green = 1.0;
+    scene->cover.material.ambient.blue = 1.0;
+
+    scene->cover.material.diffuse.red = 1.0;
+    scene->cover.material.diffuse.green = 1.0;
+    scene->cover.material.diffuse.blue = 1.0;
+
+    scene->cover.material.specular.red = 0.0;
+    scene->cover.material.specular.green = 0.0;
+    scene->cover.material.specular.blue = 0.0;
+
+    scene->cover.material.shininess = 0.0;
+
+    scene->cover.orientation.x = 0;
+    scene->cover.orientation.y = 0;
+    scene->cover.orientation.z = 0;
+
+    scene->cover.position.x = 0;
+    scene->cover.position.y = 0;
+    scene->cover.position.z = 0;
+
+    scene->cover.rotation.x = -90;
+    scene->cover.rotation.y = 0;
+    scene->cover.rotation.z = 0;
+
+    scene->cover.scale.x = 1;
+    scene->cover.scale.y = 1;
+    scene->cover.scale.z = 1;
+
+    load_model(&(scene->pages.model), "assets/models/pages.obj");
+    scene->pages.texture_id = load_texture("assets/textures/page.jpg");
+
+    scene->pages.material.ambient.red = 1.0;
+    scene->pages.material.ambient.green = 1.0;
+    scene->pages.material.ambient.blue = 1.0;
+
+    scene->pages.material.diffuse.red = 1.0;
+    scene->pages.material.diffuse.green = 1.0;
+    scene->pages.material.diffuse.blue = 1.0;
+
+    scene->pages.material.specular.red = 0.0;
+    scene->pages.material.specular.green = 0.0;
+    scene->pages.material.specular.blue = 0.0;
+
+    scene->pages.material.shininess = 0.0;
+
+    scene->pages.orientation.x = 0;
+    scene->pages.orientation.y = 0;
+    scene->pages.orientation.z = 0;
+
+    scene->pages.position.x = 0;
+    scene->pages.position.y = 0;
+    scene->pages.position.z = 0;
+
+    scene->pages.rotation.x = -90;
+    scene->pages.rotation.y = 0;
+    scene->pages.rotation.z = 0;
+
+    scene->pages.scale.x = 1;
+    scene->pages.scale.y = 1;
+    scene->pages.scale.z = 1;
 
     scene->n_pages = 3;
     scene->pages_turned = 0;
@@ -220,9 +286,11 @@ void update_scene(Scene* scene, double time) {
 void render_scene(const Scene* scene) {
     set_lighting();
 
-    draw_axes();
+    // draw_axes();
 
-    // render_object(&(scene->book));
+    render_object(&(scene->desk));
+    render_object(&(scene->cover));
+    render_object(&(scene->pages));
     render_pages(scene);
 }
 
