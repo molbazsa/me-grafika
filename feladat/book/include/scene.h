@@ -35,6 +35,8 @@ typedef struct Scene {
     size_t pages_turned;
     SDL_Surface* dot;
     GLuint* drawing_textures;
+    GLuint grass_texture;
+    GLuint skybox_texture;
 } Scene;
 
 /**
@@ -66,6 +68,16 @@ void render_scene(const Scene* scene);
  * Render a world object.
  */
 void render_object(const WorldObject* object);
+
+/**
+ * Render the grass below the desk.
+ */
+void render_grass(const Scene* scene);
+
+/**
+ * Render the grass below the desk.
+ */
+void render_skybox(const Scene* scene);
 
 /**
  * Render the top pages for the book.

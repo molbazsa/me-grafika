@@ -8,6 +8,9 @@
 #include <math.h>
 
 void init_scene(Scene* scene) {
+    scene->grass_texture = load_texture("assets/textures/grass.jpg");
+    scene->skybox_texture = load_texture("assets/textures/skybox.jpg");
+
     load_model(&(scene->desk.model), "assets/models/desk.obj");
     scene->desk.texture_id = load_texture("assets/textures/desk.jpg");
 
@@ -292,6 +295,9 @@ void render_scene(const Scene* scene) {
     render_object(&(scene->cover));
     render_object(&(scene->pages));
     render_pages(scene);
+
+    render_grass(scene);
+    render_skybox(scene);
 }
 
 void render_object(const WorldObject* object) {
@@ -310,6 +316,114 @@ void render_object(const WorldObject* object) {
     draw_model(&(object->model));
 
     glPopMatrix();
+}
+
+void render_grass(const Scene* scene) {
+    double size = 50;
+    double height = -1.6;
+
+    float position[] = {0.0f, 0.0f, 0.0f, 1.0f};
+    glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+    glBindTexture(GL_TEXTURE_2D, scene->grass_texture);
+
+    glBegin(GL_QUADS);
+
+    glNormal3f(0, 0, 1.0);
+
+    glTexCoord2f(0, 0);
+    glVertex3f(-size, -size, height);
+
+    glTexCoord2f(1, 0);
+    glVertex3f(size, -size, height);
+
+    glTexCoord2f(1, 1);
+    glVertex3f(size, size, height);
+
+    glTexCoord2f(0, 1);
+    glVertex3f(-size, size, height);
+
+    glEnd();
+}
+
+void render_skybox(const Scene* scene) {
+    double size = 50;
+
+    glBindTexture(GL_TEXTURE_2D, scene->skybox_texture);
+
+    glBegin(GL_QUADS);
+
+    glNormal3f(0, -1, 0);
+
+    glTexCoord2f(0, 1 / (float) 3);
+    glVertex3f(-size, size, size);
+
+    glTexCoord2f(0.25, 1 / (float) 3);
+    glVertex3f(size, size, size);
+
+    glTexCoord2f(0.25, 2 / (float) 3);
+    glVertex3f(size, size, -size);
+
+    glTexCoord2f(0, 2 / (float) 3);
+    glVertex3f(-size, size, -size);
+
+    glNormal3f(-1, 0, 0);
+
+    glTexCoord2f(0.25, 1 / (float) 3);
+    glVertex3f(size, size, size);
+
+    glTexCoord2f(0.5, 1 / (float) 3);
+    glVertex3f(size, -size, size);
+
+    glTexCoord2f(0.5, 2 / (float) 3);
+    glVertex3f(size, -size, -size);
+
+    glTexCoord2f(0.25, 2 / (float) 3);
+    glVertex3f(size, size, -size);
+
+    glNormal3f(0, 1, 0);
+
+    glTexCoord2f(0.5, 1 / (float) 3);
+    glVertex3f(size, -size, size);
+
+    glTexCoord2f(0.75, 1 / (float) 3);
+    glVertex3f(-size, -size, size);
+
+    glTexCoord2f(0.75, 2 / (float) 3);
+    glVertex3f(-size, -size, -size);
+
+    glTexCoord2f(0.5, 2 / (float) 3);
+    glVertex3f(size, -size, -size);
+
+    glNormal3f(1, 0, 0);
+
+    glTexCoord2f(0.75, 1 / (float) 3);
+    glVertex3f(-size, -size, size);
+
+    glTexCoord2f(1, 1 / (float) 3);
+    glVertex3f(-size, size, size);
+
+    glTexCoord2f(1, 2 / (float) 3);
+    glVertex3f(-size, size, -size);
+
+    glTexCoord2f(0.75, 2 / (float) 3);
+    glVertex3f(-size, -size, -size);
+
+    glNormal3f(0, 0, -1);
+
+    glTexCoord2f(0.25, 1 / (float) 3);
+    glVertex3f(size, size, size);
+
+    glTexCoord2f(0.5, 1 / (float) 3);
+    glVertex3f(size, -size, size);
+
+    glTexCoord2f(0.5, 0);
+    glVertex3f(-size, -size, size);
+
+    glTexCoord2f(0.25, 0);
+    glVertex3f(-size, size, size);
+
+    glEnd();
 }
 
 void render_pages(const Scene* scene) {

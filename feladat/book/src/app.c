@@ -104,7 +104,7 @@ void reshape(GLsizei width, GLsizei height) {
 void central_projection() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glFrustum(-.08, .08, -.06, .06, .1, 10);
+    glFrustum(-.08, .08, -.06, .06, .1, 100);
 }
 
 void parallel_projection() {
