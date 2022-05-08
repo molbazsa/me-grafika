@@ -3,7 +3,7 @@
 
 #include "utils.h"
 
-#include <stdbool.h>
+#include <stdlib.h>
 
 /**
  * Camera, as a moving point with direction
@@ -23,7 +23,10 @@ void init_camera(Camera* camera);
 /**
  * Update the position of the camera.
  */
-void update_camera(Camera* camera, double time);
+void update_camera(Camera* camera,
+                   double time,
+                   const BoundingBox* boxes,
+                   size_t n_boxes);
 
 /**
  * Apply the camera settings to the view transformation.

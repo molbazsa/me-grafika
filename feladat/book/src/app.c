@@ -306,7 +306,10 @@ void update_app(App* app) {
     app->uptime = current_time;
 
     if (!app->is_drawing) {
-        update_camera(&(app->camera), elapsed_time);
+        update_camera(&(app->camera),
+                      elapsed_time,
+                      app->scene.bounding_boxes,
+                      app->scene.n_bounding_boxes);
     }
     update_scene(&(app->scene), elapsed_time);
 }

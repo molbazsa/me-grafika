@@ -25,6 +25,8 @@ typedef struct Page {
 } Page;
 
 typedef struct Scene {
+    BoundingBox* bounding_boxes;
+    size_t n_bounding_boxes;
     WorldObject desk;
     WorldObject cover;
     WorldObject pages;

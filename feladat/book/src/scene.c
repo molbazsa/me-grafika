@@ -8,6 +8,10 @@
 #include <math.h>
 
 void init_scene(Scene* scene) {
+    scene->n_bounding_boxes = 1;
+    scene->bounding_boxes =
+        malloc(scene->n_bounding_boxes * sizeof(BoundingBox));
+
     scene->grass_texture = load_texture("assets/textures/grass.jpg");
     scene->skybox_texture = load_texture("assets/textures/skybox.jpg");
 
@@ -43,6 +47,14 @@ void init_scene(Scene* scene) {
     scene->desk.scale.x = 0.4;
     scene->desk.scale.y = 0.4;
     scene->desk.scale.z = 0.4;
+
+    vec3 padding = {.x = 0.5, .y = 0.5, .z = 3};
+    scene->bounding_boxes[0] = bounding_box(&(scene->desk.model),
+                                            scene->desk.position,
+                                            scene->desk.orientation,
+                                            scene->desk.rotation,
+                                            scene->desk.scale,
+                                            padding);
 
     load_model(&(scene->cover.model), "assets/models/cover.obj");
     scene->cover.texture_id = load_texture("assets/textures/leather2.jpg");
