@@ -6,242 +6,180 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <assert.h>
 
 void init_scene(Scene* scene) {
-    scene->n_bounding_boxes = 1;
-    scene->bounding_boxes =
-        malloc(scene->n_bounding_boxes * sizeof(BoundingBox));
+    load_objects(scene, "src/desk.scene");
 
     scene->grass_texture = load_texture("assets/textures/grass.jpg");
     scene->skybox_texture = load_texture("assets/textures/skybox.jpg");
 
-    load_model(&(scene->desk.model), "assets/models/desk.obj");
-    scene->desk.texture_id = load_texture("assets/textures/desk.jpg");
-
-    scene->desk.material.ambient.red = 1.0;
-    scene->desk.material.ambient.green = 1.0;
-    scene->desk.material.ambient.blue = 1.0;
-
-    scene->desk.material.diffuse.red = 1.0;
-    scene->desk.material.diffuse.green = 1.0;
-    scene->desk.material.diffuse.blue = 1.0;
-
-    scene->desk.material.specular.red = 0.0;
-    scene->desk.material.specular.green = 0.0;
-    scene->desk.material.specular.blue = 0.0;
-
-    scene->desk.material.shininess = 0.0;
-
-    scene->desk.orientation.x = 0;
-    scene->desk.orientation.y = 0;
-    scene->desk.orientation.z = 0;
-
-    scene->desk.position.x = 0;
-    scene->desk.position.y = 0;
-    scene->desk.position.z = -0.055;
-
-    scene->desk.rotation.x = 180;
-    scene->desk.rotation.y = 0;
-    scene->desk.rotation.z = 0;
-
-    scene->desk.scale.x = 0.4;
-    scene->desk.scale.y = 0.4;
-    scene->desk.scale.z = 0.4;
-
-    vec3 padding = {.x = 0.5, .y = 0.5, .z = 3};
-    scene->bounding_boxes[0] = bounding_box(&(scene->desk.model),
-                                            scene->desk.position,
-                                            scene->desk.orientation,
-                                            scene->desk.rotation,
-                                            scene->desk.scale,
-                                            padding);
-
-    load_model(&(scene->cover.model), "assets/models/cover.obj");
-    scene->cover.texture_id = load_texture("assets/textures/leather2.jpg");
-
-    scene->cover.material.ambient.red = 1.0;
-    scene->cover.material.ambient.green = 1.0;
-    scene->cover.material.ambient.blue = 1.0;
-
-    scene->cover.material.diffuse.red = 1.0;
-    scene->cover.material.diffuse.green = 1.0;
-    scene->cover.material.diffuse.blue = 1.0;
-
-    scene->cover.material.specular.red = 0.0;
-    scene->cover.material.specular.green = 0.0;
-    scene->cover.material.specular.blue = 0.0;
-
-    scene->cover.material.shininess = 0.0;
-
-    scene->cover.orientation.x = 0;
-    scene->cover.orientation.y = 0;
-    scene->cover.orientation.z = 0;
-
-    scene->cover.position.x = 0;
-    scene->cover.position.y = 0;
-    scene->cover.position.z = 0;
-
-    scene->cover.rotation.x = -90;
-    scene->cover.rotation.y = 0;
-    scene->cover.rotation.z = 0;
-
-    scene->cover.scale.x = 1;
-    scene->cover.scale.y = 1;
-    scene->cover.scale.z = 1;
-
-    load_model(&(scene->pages.model), "assets/models/pages.obj");
-    scene->pages.texture_id = load_texture("assets/textures/page.jpg");
-
-    scene->pages.material.ambient.red = 1.0;
-    scene->pages.material.ambient.green = 1.0;
-    scene->pages.material.ambient.blue = 1.0;
-
-    scene->pages.material.diffuse.red = 1.0;
-    scene->pages.material.diffuse.green = 1.0;
-    scene->pages.material.diffuse.blue = 1.0;
-
-    scene->pages.material.specular.red = 0.0;
-    scene->pages.material.specular.green = 0.0;
-    scene->pages.material.specular.blue = 0.0;
-
-    scene->pages.material.shininess = 0.0;
-
-    scene->pages.orientation.x = 0;
-    scene->pages.orientation.y = 0;
-    scene->pages.orientation.z = 0;
-
-    scene->pages.position.x = 0;
-    scene->pages.position.y = 0;
-    scene->pages.position.z = 0;
-
-    scene->pages.rotation.x = -90;
-    scene->pages.rotation.y = 0;
-    scene->pages.rotation.z = 0;
-
-    scene->pages.scale.x = 1;
-    scene->pages.scale.y = 1;
-    scene->pages.scale.z = 1;
-
     scene->n_pages = 3;
     scene->pages_turned = 0;
+
+    scene->left_page.object = scene->objects + obj_index(scene, "left_page");
+    scene->turning_page.object =
+        scene->objects + obj_index(scene, "turning_page");
+    scene->right_page.object = scene->objects + obj_index(scene, "right_page");
+
+    scene->left_page.turn_direction = 0;
+    scene->turning_page.turn_direction = 0;
+    scene->right_page.turn_direction = 0;
 
     scene->drawing_textures = malloc((scene->n_pages + 2) * sizeof(GLuint));
     for (size_t i = 0; i < scene->n_pages + 2; i++) {
         scene->drawing_textures[i] = load_texture("assets/textures/page.jpg");
     }
 
-    load_model(&(scene->left_page.object.model), "assets/models/page.obj");
-
-    scene->left_page.object.material.ambient.red = 1.0;
-    scene->left_page.object.material.ambient.green = 1.0;
-    scene->left_page.object.material.ambient.blue = 1.0;
-
-    scene->left_page.object.material.diffuse.red = 1.0;
-    scene->left_page.object.material.diffuse.green = 1.0;
-    scene->left_page.object.material.diffuse.blue = 1.0;
-
-    scene->left_page.object.material.specular.red = 0.0;
-    scene->left_page.object.material.specular.green = 0.0;
-    scene->left_page.object.material.specular.blue = 0.0;
-
-    scene->left_page.object.material.shininess = 0.0;
-
-    scene->left_page.object.position.x = 0;
-    scene->left_page.object.position.y = 0;
-    scene->left_page.object.position.z = 0;
-
-    scene->left_page.object.orientation.x = -90;
-    scene->left_page.object.orientation.y = 0;
-    scene->left_page.object.orientation.z = 0;
-
-    scene->left_page.object.rotation.x = 0;
-    scene->left_page.object.rotation.y = 180;
-    scene->left_page.object.rotation.z = 0;
-
-    scene->left_page.object.scale.x = 1;
-    scene->left_page.object.scale.y = 1;
-    scene->left_page.object.scale.z = -1;
-
-    scene->left_page.turn_direction = 0;
-
-    load_model(&(scene->turning_page.object.model), "assets/models/page.obj");
-
-    scene->turning_page.object.material.ambient.red = 1.0;
-    scene->turning_page.object.material.ambient.green = 1.0;
-    scene->turning_page.object.material.ambient.blue = 1.0;
-
-    scene->turning_page.object.material.diffuse.red = 1.0;
-    scene->turning_page.object.material.diffuse.green = 1.0;
-    scene->turning_page.object.material.diffuse.blue = 1.0;
-
-    scene->turning_page.object.material.specular.red = 0.0;
-    scene->turning_page.object.material.specular.green = 0.0;
-    scene->turning_page.object.material.specular.blue = 0.0;
-
-    scene->turning_page.object.material.shininess = 0.0;
-
-    scene->turning_page.object.position.x = 0;
-    scene->turning_page.object.position.y = 0;
-    scene->turning_page.object.position.z = 0;
-
-    scene->turning_page.object.orientation.x = -90;
-    scene->turning_page.object.orientation.y = 0;
-    scene->turning_page.object.orientation.z = 0;
-
-    scene->turning_page.object.rotation.x = 0;
-    scene->turning_page.object.rotation.y = 0;
-    scene->turning_page.object.rotation.z = 0;
-
-    scene->turning_page.object.scale.x = 1;
-    scene->turning_page.object.scale.y = 1;
-    scene->turning_page.object.scale.z = 1;
-
-    scene->turning_page.turn_direction = 0;
-
-    load_model(&(scene->right_page.object.model), "assets/models/page.obj");
-
-    scene->right_page.object.material.ambient.red = 1.0;
-    scene->right_page.object.material.ambient.green = 1.0;
-    scene->right_page.object.material.ambient.blue = 1.0;
-
-    scene->right_page.object.material.diffuse.red = 1.0;
-    scene->right_page.object.material.diffuse.green = 1.0;
-    scene->right_page.object.material.diffuse.blue = 1.0;
-
-    scene->right_page.object.material.specular.red = 0.0;
-    scene->right_page.object.material.specular.green = 0.0;
-    scene->right_page.object.material.specular.blue = 0.0;
-
-    scene->right_page.object.material.shininess = 0.0;
-
-    scene->right_page.object.position.x = 0;
-    scene->right_page.object.position.y = 0;
-    scene->right_page.object.position.z = 0;
-
-    scene->right_page.object.orientation.x = -90;
-    scene->right_page.object.orientation.y = 0;
-    scene->right_page.object.orientation.z = 0;
-
-    scene->right_page.object.rotation.x = 0;
-    scene->right_page.object.rotation.y = 0;
-    scene->right_page.object.rotation.z = 0;
-
-    scene->right_page.object.scale.x = 1;
-    scene->right_page.object.scale.y = 1;
-    scene->right_page.object.scale.z = 1;
-
-    scene->right_page.turn_direction = 0;
-
-    scene->left_page.object.texture_id =
+    scene->left_page.object->texture_id =
         scene->drawing_textures[scene->pages_turned];
-
-    scene->turning_page.object.texture_id =
+    scene->turning_page.object->texture_id =
         scene->drawing_textures[scene->pages_turned + 1];
-
-    scene->right_page.object.texture_id =
+    scene->right_page.object->texture_id =
         scene->drawing_textures[scene->pages_turned + 1];
 
     scene->dot = IMG_Load("assets/textures/dot.jpg");
+}
+
+bool load_objects(Scene* scene, char const* scene_file) {
+    char line[BUFSIZ];
+    char* success;
+    SceneFileParam param;
+
+    FILE* scenef = fopen(scene_file, "r");
+    if (!scenef) {
+        return false;
+    }
+
+    size_t n_objects = 0;
+    size_t n_bounding_boxes = 0;
+
+    success = fgets(line, BUFSIZ, scenef);
+    while (success) {
+        SceneFileCommand command = parse_scene_file_command(line, &param);
+        switch (command) {
+            case syntax_error:
+                fclose(scenef);
+                return false;
+            case object_command:
+                n_objects++;
+                break;
+            case bounding_box_command:
+                n_bounding_boxes++;
+                break;
+            default:
+                break;
+        }
+        success = fgets(line, BUFSIZ, scenef);
+    }
+
+    scene->n_objects = n_objects;
+    scene->objects = malloc(n_objects * sizeof(WorldObject));
+    scene->object_ids = malloc(n_objects * sizeof(char*));
+    for (size_t i = 0; i < n_objects; i++) {
+        scene->object_ids[i] = malloc(BUFSIZ * sizeof(char));
+    }
+
+    scene->n_bounding_boxes = n_bounding_boxes;
+    scene->bounding_boxes =
+        malloc(scene->n_bounding_boxes * sizeof(BoundingBox));
+
+    size_t current_obj = -1;
+    size_t current_bbox = 0;
+
+    rewind(scenef);
+    success = fgets(line, BUFSIZ, scenef);
+    while (success) {
+        SceneFileCommand command = parse_scene_file_command(line, &param);
+
+        switch (command) {
+            case object_command:
+                current_obj++;
+                strcpy(scene->object_ids[current_obj], param.filename);
+                break;
+
+            case model_command:
+                load_model(&(scene->objects[current_obj].model),
+                           param.filename);
+                break;
+            case texture_command:
+                scene->objects[current_obj].texture_id =
+                    load_texture(param.filename);
+                break;
+
+            case mat_ambient_command:
+                scene->objects[current_obj].material.ambient.red =
+                    param.vector.x;
+                scene->objects[current_obj].material.ambient.green =
+                    param.vector.y;
+                scene->objects[current_obj].material.ambient.blue =
+                    param.vector.z;
+                break;
+            case mat_diffuse_command:
+                scene->objects[current_obj].material.diffuse.red =
+                    param.vector.x;
+                scene->objects[current_obj].material.diffuse.green =
+                    param.vector.y;
+                scene->objects[current_obj].material.diffuse.blue =
+                    param.vector.z;
+                break;
+            case mat_specular_command:
+                scene->objects[current_obj].material.specular.red =
+                    param.vector.x;
+                scene->objects[current_obj].material.specular.green =
+                    param.vector.y;
+                scene->objects[current_obj].material.specular.blue =
+                    param.vector.z;
+                break;
+            case mat_shininess_command:
+                scene->objects[current_obj].material.shininess =
+                    param.float_val;
+                break;
+
+            case orientation_command:
+                scene->objects[current_obj].orientation = param.vector;
+                break;
+            case position_command:
+                scene->objects[current_obj].position = param.vector;
+                break;
+            case rotation_command:
+                scene->objects[current_obj].rotation = param.vector;
+                break;
+            case scale_command:
+                scene->objects[current_obj].scale = param.vector;
+                break;
+
+            case bounding_box_command:
+                scene->bounding_boxes[current_bbox] =
+                    bounding_box(&(scene->objects[current_obj]), param.vector);
+                current_bbox++;
+                break;
+
+            default:
+                break;
+        }
+
+        success = fgets(line, BUFSIZ, scenef);
+    }
+
+    fclose(scenef);
+    return true;
+}
+
+size_t obj_index(const Scene* scene, char const* object_id) {
+    size_t index = -1;
+
+    for (size_t i = 0; i < scene->n_objects; i++) {
+        if (strcmp(scene->object_ids[i], object_id) == 0) {
+            index = i;
+            break;
+        }
+    }
+
+    return index;
 }
 
 void set_lighting() {
@@ -278,21 +216,21 @@ void update_scene(Scene* scene, double time) {
     double const TURN_SPEED = 2;
 
     if (scene->turning_page.turn_direction == 1) {
-        scene->turning_page.object.rotation.y += 180 * TURN_SPEED * time;
-        scene->turning_page.object.scale.z -= 2 * TURN_SPEED * time;
-        if (scene->turning_page.object.rotation.y >= 180) {
+        scene->turning_page.object->rotation.y += 180 * TURN_SPEED * time;
+        scene->turning_page.object->scale.z -= 2 * TURN_SPEED * time;
+        if (scene->turning_page.object->rotation.y >= 180) {
             scene->turning_page.turn_direction = 0;
             scene->pages_turned++;
-            scene->left_page.object.texture_id =
+            scene->left_page.object->texture_id =
                 scene->drawing_textures[scene->pages_turned];
         }
     } else if (scene->turning_page.turn_direction == -1) {
-        scene->turning_page.object.rotation.y -= 180 * TURN_SPEED * time;
-        scene->turning_page.object.scale.z += 2 * TURN_SPEED * time;
-        if (scene->turning_page.object.rotation.y <= 0) {
+        scene->turning_page.object->rotation.y -= 180 * TURN_SPEED * time;
+        scene->turning_page.object->scale.z += 2 * TURN_SPEED * time;
+        if (scene->turning_page.object->rotation.y <= 0) {
             scene->turning_page.turn_direction = 0;
             scene->pages_turned--;
-            scene->right_page.object.texture_id =
+            scene->right_page.object->texture_id =
                 scene->drawing_textures[scene->pages_turned + 1];
         }
     }
@@ -303,9 +241,9 @@ void render_scene(const Scene* scene) {
 
     // draw_axes();
 
-    render_object(&(scene->desk));
-    render_object(&(scene->cover));
-    render_object(&(scene->pages));
+    render_object(scene->objects + obj_index(scene, "desk"));
+    render_object(scene->objects + obj_index(scene, "cover"));
+    render_object(scene->objects + obj_index(scene, "pages"));
     render_pages(scene);
 
     render_grass(scene);
@@ -440,33 +378,33 @@ void render_skybox(const Scene* scene) {
 
 void render_pages(const Scene* scene) {
     if (scene->turning_page.turn_direction != 0) {
-        render_object(&(scene->turning_page.object));
+        render_object(scene->turning_page.object);
     }
-    render_object(&(scene->left_page.object));
-    render_object(&(scene->right_page.object));
+    render_object(scene->left_page.object);
+    render_object(scene->right_page.object);
 }
 
 void turn_page(Scene* scene) {
     if (scene->turning_page.turn_direction == 0 &&
         scene->pages_turned < scene->n_pages) {
-        scene->turning_page.object.rotation.y = 0;
-        scene->turning_page.object.scale.z = 1;
+        scene->turning_page.object->rotation.y = 0;
+        scene->turning_page.object->scale.z = 1;
         scene->turning_page.turn_direction = 1;
-        scene->turning_page.object.texture_id =
+        scene->turning_page.object->texture_id =
             scene->drawing_textures[scene->pages_turned + 1];
-        scene->right_page.object.texture_id =
+        scene->right_page.object->texture_id =
             scene->drawing_textures[scene->pages_turned + 2];
     }
 }
 
 void turn_page_back(Scene* scene) {
     if (scene->turning_page.turn_direction == 0 && scene->pages_turned > 0) {
-        scene->turning_page.object.rotation.y = 180;
-        scene->turning_page.object.scale.z = -1;
+        scene->turning_page.object->rotation.y = 180;
+        scene->turning_page.object->scale.z = -1;
         scene->turning_page.turn_direction = -1;
-        scene->left_page.object.texture_id =
+        scene->left_page.object->texture_id =
             scene->drawing_textures[scene->pages_turned - 1];
-        scene->turning_page.object.texture_id =
+        scene->turning_page.object->texture_id =
             scene->drawing_textures[scene->pages_turned];
     }
 }

@@ -141,7 +141,7 @@ void draw_on_page(Scene* scene, int mouse_x, int mouse_y) {
            x_offset,
            y_offset);
 
-    glBindTexture(GL_TEXTURE_2D, scene->right_page.object.texture_id);
+    glBindTexture(GL_TEXTURE_2D, scene->right_page.object->texture_id);
     glTexSubImage2D(GL_TEXTURE_2D,
                     0,
                     x_offset,

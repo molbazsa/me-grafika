@@ -8,25 +8,19 @@
 #include <obj/model.h>
 
 #include <stdlib.h>
-
-typedef struct WorldObject {
-    Model model;
-    vec3 position;
-    vec3 orientation;
-    vec3 rotation;
-    vec3 scale;
-    Material material;
-    GLuint texture_id;
-} WorldObject;
+#include <stdio.h>
 
 typedef struct Page {
-    WorldObject object;
+    WorldObject* object;
     int turn_direction;
 } Page;
 
 typedef struct Scene {
     BoundingBox* bounding_boxes;
     size_t n_bounding_boxes;
+    WorldObject* objects;
+    char** object_ids;
+    size_t n_objects;
     WorldObject desk;
     WorldObject cover;
     WorldObject pages;
@@ -45,6 +39,9 @@ typedef struct Scene {
  * Initialize the scene by loading models.
  */
 void init_scene(Scene* scene);
+
+bool load_objects(Scene* scene, char const* scene_file);
+size_t obj_index(const Scene* scene, char const* object_id);
 
 /**
  * Set the lighting of the scene.

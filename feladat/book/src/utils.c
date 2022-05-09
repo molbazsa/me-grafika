@@ -8,14 +8,14 @@ double degree_to_radian(double degree) {
     return degree * M_PI / 180.0;
 }
 
-BoundingBox bounding_box(const Model* model,
-                         vec3 position,
-                         vec3 orientation,
-                         vec3 rotation,
-                         vec3 scale,
-                         vec3 padding) {
+BoundingBox bounding_box(const WorldObject* object, vec3 padding) {
     BoundingBox box;
     GLfloat view[16];
+    const Model* model = &(object->model);
+    vec3 orientation = object->orientation;
+    vec3 position = object->position;
+    vec3 rotation = object->rotation;
+    vec3 scale = object->scale;
 
     int i;
     double x, y, z;
@@ -75,17 +75,12 @@ BoundingBox bounding_box(const Model* model,
     glGetFloatv(GL_MODELVIEW_MATRIX, view);
     glPopMatrix();
 
-    printf("%f, %f, %f, %f\n", view[0], view[1], view[2], view[3]);
-    printf("%f, %f, %f, %f\n", view[4], view[5], view[6], view[7]);
-    printf("%f, %f, %f, %f\n", view[8], view[9], view[10], view[11]);
-    printf("%f, %f, %f, %f\n", view[12], view[13], view[14], view[15]);
-
-    box.min_x = view[0] * min_x + view[1] * min_y + view[2] * min_z + view[3];
-    box.min_y = view[4] * min_x + view[5] * min_y + view[6] * min_z + view[7];
-    box.min_z = view[8] * min_x + view[9] * min_y + view[10] * min_z + view[11];
-    box.max_x = view[0] * max_x + view[1] * max_y + view[2] * max_z + view[3];
-    box.max_y = view[4] * max_x + view[5] * max_y + view[6] * max_z + view[7];
-    box.max_z = view[8] * max_x + view[9] * max_y + view[10] * max_z + view[11];
+    box.min_x = view[0] * min_x + view[4] * min_y + view[8] * min_z + view[12];
+    box.min_y = view[1] * min_x + view[5] * min_y + view[9] * min_z + view[13];
+    box.min_z = view[2] * min_x + view[6] * min_y + view[10] * min_z + view[14];
+    box.max_x = view[0] * max_x + view[4] * max_y + view[8] * max_z + view[12];
+    box.max_y = view[1] * max_x + view[5] * max_y + view[9] * max_z + view[13];
+    box.max_z = view[2] * max_x + view[6] * max_y + view[10] * max_z + view[14];
 
     if (box.min_x > box.max_x) {
         double min = box.max_x;
@@ -120,4 +115,129 @@ bool is_in_bounding_box(vec3 position, BoundingBox bounding_box) {
         bounding_box.min_x < position.x && position.x < bounding_box.max_x &&
         bounding_box.min_y < position.y && position.y < bounding_box.max_y &&
         bounding_box.min_z < position.z && position.z < bounding_box.max_z);
+}
+
+void parse_filename(char* line, char* keyword, SceneFileParam* param) {
+    line[strlen(line) - 1] = 0;
+    line += strlen(keyword);
+    while (isspace(*line)) {
+        line++;
+    }
+    param->filename = line;
+}
+
+void parse_vector(char* line, char* keyword, SceneFileParam* param) {
+    line += strlen(keyword);
+    while (isspace(*line)) {
+        line++;
+    }
+    param->vector.x = atof(line);
+    while (!isspace(*line)) {
+        line++;
+    }
+    while (isspace(*line)) {
+        line++;
+    }
+    param->vector.y = atof(line);
+    while (!isspace(*line)) {
+        line++;
+    }
+    while (isspace(*line)) {
+        line++;
+    }
+    param->vector.z = atof(line);
+}
+
+void parse_float(char* line, char* keyword, SceneFileParam* param) {
+    line += strlen(keyword);
+    while (isspace(*line)) {
+        line++;
+    }
+    param->float_val = atof(line);
+}
+
+SceneFileCommand parse_scene_file_command(char* line, SceneFileParam* param) {
+    char* keyword;
+
+    while (isspace(*line)) {
+        line++;
+    }
+
+    if (!(*line)) {
+        return empty_command;
+    }
+
+    keyword = "object";
+    if (strncmp(keyword, line, strlen(keyword)) == 0) {
+        parse_filename(line, keyword, param);
+        return object_command;
+    }
+
+    keyword = "model";
+    if (strncmp(keyword, line, strlen(keyword)) == 0) {
+        parse_filename(line, keyword, param);
+        return model_command;
+    }
+
+    keyword = "texture";
+    if (strncmp(keyword, line, strlen(keyword)) == 0) {
+        parse_filename(line, keyword, param);
+        return texture_command;
+    }
+
+    keyword = "mat_ambient";
+    if (strncmp(keyword, line, strlen(keyword)) == 0) {
+        parse_vector(line, keyword, param);
+        return mat_ambient_command;
+    }
+
+    keyword = "mat_diffuse";
+    if (strncmp(keyword, line, strlen(keyword)) == 0) {
+        parse_vector(line, keyword, param);
+        return mat_diffuse_command;
+    }
+
+    keyword = "mat_specular";
+    if (strncmp(keyword, line, strlen(keyword)) == 0) {
+        parse_vector(line, keyword, param);
+        return mat_specular_command;
+    }
+
+    keyword = "mat_shininess";
+    if (strncmp(keyword, line, strlen(keyword)) == 0) {
+        parse_float(line, keyword, param);
+        return mat_shininess_command;
+    }
+
+    keyword = "orientation";
+    if (strncmp(keyword, line, strlen(keyword)) == 0) {
+        parse_vector(line, keyword, param);
+        return orientation_command;
+    }
+
+    keyword = "position";
+    if (strncmp(keyword, line, strlen(keyword)) == 0) {
+        parse_vector(line, keyword, param);
+        return position_command;
+    }
+
+    keyword = "rotation";
+    if (strncmp(keyword, line, strlen(keyword)) == 0) {
+        parse_vector(line, keyword, param);
+        return rotation_command;
+    }
+
+    keyword = "scale";
+    if (strncmp(keyword, line, strlen(keyword)) == 0) {
+        parse_vector(line, keyword, param);
+        return scale_command;
+    }
+
+    keyword = "bounding_box";
+    if (strncmp(keyword, line, strlen(keyword)) == 0) {
+        parse_vector(line, keyword, param);
+        return bounding_box_command;
+    }
+
+    return syntax_error;
 }
