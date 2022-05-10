@@ -67,3 +67,27 @@ orientation -90.0 0.0 0.0
 position 0.0 0.0 0.0
 rotation 0.0 0.0 0.0
 scale 1.0 1.0 1.0
+
+static object lamp
+model assets/models/lamp.obj
+texture assets/textures/lamp.jpg
+material ambient 1.0 1.0 1.0
+material diffuse 1.0 1.0 1.0
+material specular 0.0 0.0 0.0
+material shininess 0.0
+orientation -90.0 0.0 225.0
+position -1.0 0.6 0.0
+rotation 0.0 0.0 0.0
+scale 1.2 1.2 1.2
+
+static object bulb
+model assets/models/bulb.obj
+texture assets/textures/bulb.jpg
+material ambient 1.0 1.0 1.0
+material diffuse 1.0 1.0 1.0
+material specular 0.0 0.0 0.0
+material shininess 0.0
+orientation 0.0 0.0 0.0
+position -0.735 0.335 0.9
+rotation 0.0 0.0 0.0
+scale 0.1 0.1 0.1
