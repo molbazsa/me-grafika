@@ -1,69 +1,69 @@
-object desk
+static object desk
 model assets/models/desk.obj
 texture assets/textures/desk.jpg
-mat_ambient 1.0 1.0 1.0
-mat_diffuse 1.0 1.0 1.0
-mat_specular 0.0 0.0 0.0
-mat_shininess 0.0
+material ambient 1.0 1.0 1.0
+material diffuse 1.0 1.0 1.0
+material specular 0.0 0.0 0.0
+material shininess 0.0
 orientation 180.0 0.0 0.0
 position 0.0 0.0 -0.055
 rotation 0.0 0.0 0.0
 scale 0.4 0.4 0.4
-bounding_box 0.5 0.5 3.0
+bounding box 0.5 0.5 3.0
 
-object cover
+static object cover
 model assets/models/cover.obj
 texture assets/textures/leather2.jpg
-mat_ambient 1.0 1.0 1.0
-mat_diffuse 1.0 1.0 1.0
-mat_specular 0.0 0.0 0.0
-mat_shininess 0.0
+material ambient 1.0 1.0 1.0
+material diffuse 1.0 1.0 1.0
+material specular 0.0 0.0 0.0
+material shininess 0.0
 orientation -90.0 0.0 0.0
 position 0.0 0.0 0.0
 rotation 0.0 0.0 0.0
-scale 1 1 1
+scale 1.0 1.0 1.0
 
-object pages
+static object pages
 model assets/models/pages.obj
 texture assets/textures/page.jpg
-mat_ambient 1.0 1.0 1.0
-mat_diffuse 1.0 1.0 1.0
-mat_specular 0.0 0.0 0.0
-mat_shininess 0.0
+material ambient 1.0 1.0 1.0
+material diffuse 1.0 1.0 1.0
+material specular 0.0 0.0 0.0
+material shininess 0.0
 orientation -90.0 0.0 0.0
 position 0.0 0.0 0.0
 rotation 0.0 0.0 0.0
-scale 1 1 1
+scale 1.0 1.0 1.0
 
 object left_page
 model assets/models/page.obj
-mat_ambient 1.0 1.0 1.0
-mat_diffuse 1.0 1.0 1.0
-mat_specular 0.0 0.0 0.0
-mat_shininess 0.0
+material ambient 1.0 1.0 1.0
+material diffuse 1.0 1.0 1.0
+material specular 0.0 0.0 0.0
+material shininess 0.0
 orientation -90.0 0.0 0.0
 position 0.0 0.0 0.0
 rotation 0.0 180.0 0.0
-scale 1 1 -1
+scale 1.0 1.0 -1.0
 
 object turning_page
 model assets/models/page.obj
-mat_ambient 1.0 1.0 1.0
-mat_diffuse 1.0 1.0 1.0
-mat_specular 0.0 0.0 0.0
-mat_shininess 0.0
+material ambient 1.0 1.0 1.0
+material diffuse 1.0 1.0 1.0
+material specular 0.0 0.0 0.0
+material shininess 0.0
 orientation -90.0 0.0 0.0
 position 0.0 0.0 0.0
 rotation 0.0 0.0 0.0
-scale 1 1 1
+scale 1.0 1.0 1.0
 
 object right_page
 model assets/models/page.obj
-mat_ambient 1.0 1.0 1.0
-mat_diffuse 1.0 1.0 1.0
-mat_specular 0.0 0.0 0.0
-mat_shininess 0.0
+material ambient 1.0 1.0 1.0
+material diffuse 1.0 1.0 1.0
+material specular 0.0 0.0 0.0
+material shininess 0.0
 orientation -90.0 0.0 0.0
 position 0.0 0.0 0.0
 rotation 0.0 0.0 0.0
-scale 1 1 1
+scale 1.0 1.0 1.0

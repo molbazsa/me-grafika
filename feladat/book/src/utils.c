@@ -156,6 +156,22 @@ void parse_float(char* line, char* keyword, SceneFileParam* param) {
     param->float_val = atof(line);
 }
 
+bool is_comment(char const* line) {
+    char* keyword;
+
+    keyword = "#";
+    if (strncmp(keyword, line, strlen(keyword)) == 0) {
+        return true;
+    }
+
+    keyword = "//";
+    if (strncmp(keyword, line, strlen(keyword)) == 0) {
+        return true;
+    }
+
+    return false;
+}
+
 SceneFileCommand parse_scene_file_command(char* line, SceneFileParam* param) {
     char* keyword;
 
@@ -163,8 +179,14 @@ SceneFileCommand parse_scene_file_command(char* line, SceneFileParam* param) {
         line++;
     }
 
-    if (!(*line)) {
+    if (!(*line) || is_comment(line)) {
         return empty_command;
+    }
+
+    keyword = "static object";
+    if (strncmp(keyword, line, strlen(keyword)) == 0) {
+        parse_filename(line, keyword, param);
+        return static_object_command;
     }
 
     keyword = "object";
@@ -185,25 +207,25 @@ SceneFileCommand parse_scene_file_command(char* line, SceneFileParam* param) {
         return texture_command;
     }
 
-    keyword = "mat_ambient";
+    keyword = "material ambient";
     if (strncmp(keyword, line, strlen(keyword)) == 0) {
         parse_vector(line, keyword, param);
         return mat_ambient_command;
     }
 
-    keyword = "mat_diffuse";
+    keyword = "material diffuse";
     if (strncmp(keyword, line, strlen(keyword)) == 0) {
         parse_vector(line, keyword, param);
         return mat_diffuse_command;
     }
 
-    keyword = "mat_specular";
+    keyword = "material specular";
     if (strncmp(keyword, line, strlen(keyword)) == 0) {
         parse_vector(line, keyword, param);
         return mat_specular_command;
     }
 
-    keyword = "mat_shininess";
+    keyword = "material shininess";
     if (strncmp(keyword, line, strlen(keyword)) == 0) {
         parse_float(line, keyword, param);
         return mat_shininess_command;
@@ -233,7 +255,7 @@ SceneFileCommand parse_scene_file_command(char* line, SceneFileParam* param) {
         return scale_command;
     }
 
-    keyword = "bounding_box";
+    keyword = "bounding box";
     if (strncmp(keyword, line, strlen(keyword)) == 0) {
         parse_vector(line, keyword, param);
         return bounding_box_command;

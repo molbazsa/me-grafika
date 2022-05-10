@@ -6,13 +6,32 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
 
 void init_scene(Scene* scene) {
-    load_objects(scene, "src/desk.scene");
+    char* scene_file = "src/desk.scene";
+    bool success = load_objects(scene, scene_file);
+    if (!success) {
+        fprintf(stderr, "Syntax error in %s\n", scene_file);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Loaded objects:\n");
+    size_t i = 0;
+    printf("- Static:\n");
+    while (i < scene->n_static_objects) {
+        printf("    %s\n", scene->object_ids[i]);
+        i++;
+    }
+    printf("- Normal:\n");
+    while (i < scene->n_objects) {
+        printf("    %s\n", scene->object_ids[i]);
+        i++;
+    }
 
     scene->grass_texture = load_texture("assets/textures/grass.jpg");
     scene->skybox_texture = load_texture("assets/textures/skybox.jpg");
@@ -44,10 +63,72 @@ void init_scene(Scene* scene) {
     scene->dot = IMG_Load("assets/textures/dot.jpg");
 }
 
+void set_object_props(Scene* scene,
+                      size_t current_obj,
+                      SceneFileCommand command,
+                      SceneFileParam param) {
+    switch (command) {
+        case model_command:
+            load_model(&(scene->objects[current_obj].model),
+                        param.filename);
+            break;
+        case texture_command:
+            scene->objects[current_obj].texture_id =
+                load_texture(param.filename);
+            break;
+
+        case mat_ambient_command:
+            scene->objects[current_obj].material.ambient.red =
+                param.vector.x;
+            scene->objects[current_obj].material.ambient.green =
+                param.vector.y;
+            scene->objects[current_obj].material.ambient.blue =
+                param.vector.z;
+            break;
+        case mat_diffuse_command:
+            scene->objects[current_obj].material.diffuse.red =
+                param.vector.x;
+            scene->objects[current_obj].material.diffuse.green =
+                param.vector.y;
+            scene->objects[current_obj].material.diffuse.blue =
+                param.vector.z;
+            break;
+        case mat_specular_command:
+            scene->objects[current_obj].material.specular.red =
+                param.vector.x;
+            scene->objects[current_obj].material.specular.green =
+                param.vector.y;
+            scene->objects[current_obj].material.specular.blue =
+                param.vector.z;
+            break;
+        case mat_shininess_command:
+            scene->objects[current_obj].material.shininess =
+                param.float_val;
+            break;
+
+        case orientation_command:
+            scene->objects[current_obj].orientation = param.vector;
+            break;
+        case position_command:
+            scene->objects[current_obj].position = param.vector;
+            break;
+        case rotation_command:
+            scene->objects[current_obj].rotation = param.vector;
+            break;
+        case scale_command:
+            scene->objects[current_obj].scale = param.vector;
+            break;
+
+        default:
+            break;
+    }
+}
+
 bool load_objects(Scene* scene, char const* scene_file) {
     char line[BUFSIZ];
     char* success;
     SceneFileParam param;
+    bool skip;
 
     FILE* scenef = fopen(scene_file, "r");
     if (!scenef) {
@@ -64,6 +145,7 @@ bool load_objects(Scene* scene, char const* scene_file) {
             case syntax_error:
                 fclose(scenef);
                 return false;
+            case static_object_command:
             case object_command:
                 n_objects++;
                 break;
@@ -90,76 +172,58 @@ bool load_objects(Scene* scene, char const* scene_file) {
     size_t current_obj = -1;
     size_t current_bbox = 0;
 
+    size_t n_static_objects = 0;
+
     rewind(scenef);
     success = fgets(line, BUFSIZ, scenef);
     while (success) {
         SceneFileCommand command = parse_scene_file_command(line, &param);
 
-        switch (command) {
-            case object_command:
-                current_obj++;
-                strcpy(scene->object_ids[current_obj], param.filename);
-                break;
+        if (command == static_object_command) {
+            skip = false;
+            n_static_objects++;
+            current_obj++;
+            strcpy(scene->object_ids[current_obj], param.filename);
+        } else if (command == object_command) {
+            skip = true;
+        }
 
-            case model_command:
-                load_model(&(scene->objects[current_obj].model),
-                           param.filename);
-                break;
-            case texture_command:
-                scene->objects[current_obj].texture_id =
-                    load_texture(param.filename);
-                break;
-
-            case mat_ambient_command:
-                scene->objects[current_obj].material.ambient.red =
-                    param.vector.x;
-                scene->objects[current_obj].material.ambient.green =
-                    param.vector.y;
-                scene->objects[current_obj].material.ambient.blue =
-                    param.vector.z;
-                break;
-            case mat_diffuse_command:
-                scene->objects[current_obj].material.diffuse.red =
-                    param.vector.x;
-                scene->objects[current_obj].material.diffuse.green =
-                    param.vector.y;
-                scene->objects[current_obj].material.diffuse.blue =
-                    param.vector.z;
-                break;
-            case mat_specular_command:
-                scene->objects[current_obj].material.specular.red =
-                    param.vector.x;
-                scene->objects[current_obj].material.specular.green =
-                    param.vector.y;
-                scene->objects[current_obj].material.specular.blue =
-                    param.vector.z;
-                break;
-            case mat_shininess_command:
-                scene->objects[current_obj].material.shininess =
-                    param.float_val;
-                break;
-
-            case orientation_command:
-                scene->objects[current_obj].orientation = param.vector;
-                break;
-            case position_command:
-                scene->objects[current_obj].position = param.vector;
-                break;
-            case rotation_command:
-                scene->objects[current_obj].rotation = param.vector;
-                break;
-            case scale_command:
-                scene->objects[current_obj].scale = param.vector;
-                break;
-
-            case bounding_box_command:
+        if (!skip) {
+            if (command == bounding_box_command) {
                 scene->bounding_boxes[current_bbox] =
                     bounding_box(&(scene->objects[current_obj]), param.vector);
                 current_bbox++;
-                break;
+            } else {
+                set_object_props(scene, current_obj, command, param);
+            }
+        }
 
-            default:
-                break;
+        success = fgets(line, BUFSIZ, scenef);
+    }
+
+    scene->n_static_objects = n_static_objects;
+
+    rewind(scenef);
+    success = fgets(line, BUFSIZ, scenef);
+    while (success) {
+        SceneFileCommand command = parse_scene_file_command(line, &param);
+
+        if (command == object_command) {
+            skip = false;
+            current_obj++;
+            strcpy(scene->object_ids[current_obj], param.filename);
+        } else if (command == static_object_command) {
+            skip = true;
+        }
+
+        if (!skip) {
+            if (command == bounding_box_command) {
+                scene->bounding_boxes[current_bbox] =
+                    bounding_box(&(scene->objects[current_obj]), param.vector);
+                current_bbox++;
+            } else {
+                set_object_props(scene, current_obj, command, param);
+            }
         }
 
         success = fgets(line, BUFSIZ, scenef);
@@ -241,13 +305,17 @@ void render_scene(const Scene* scene) {
 
     // draw_axes();
 
-    render_object(scene->objects + obj_index(scene, "desk"));
-    render_object(scene->objects + obj_index(scene, "cover"));
-    render_object(scene->objects + obj_index(scene, "pages"));
+    render_static_objects(scene);
     render_pages(scene);
 
     render_grass(scene);
     render_skybox(scene);
+}
+
+void render_static_objects(const Scene* scene) {
+    for (size_t i = 0; i < scene->n_static_objects; i++) {
+        render_object(&scene->objects[i]);
+    }
 }
 
 void render_object(const WorldObject* object) {

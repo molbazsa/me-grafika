@@ -69,6 +69,7 @@ BoundingBox bounding_box(const WorldObject* object, vec3 padding);
 bool is_in_bounding_box(vec3 position, BoundingBox bounding_box);
 
 enum SceneFileCommand {
+    static_object_command,
     object_command,
     model_command,
     texture_command,

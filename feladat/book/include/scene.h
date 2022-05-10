@@ -21,6 +21,7 @@ typedef struct Scene {
     WorldObject* objects;
     char** object_ids;
     size_t n_objects;
+    size_t n_static_objects;
     WorldObject desk;
     WorldObject cover;
     WorldObject pages;
@@ -62,6 +63,11 @@ void update_scene(Scene* scene, double time);
  * Render the scene.
  */
 void render_scene(const Scene* scene);
+
+/**
+ * Render every static world object.
+ */
+void render_static_objects(const Scene* scene);
 
 /**
  * Render a world object.
