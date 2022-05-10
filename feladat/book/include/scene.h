@@ -22,9 +22,9 @@ typedef struct Scene {
     char** object_ids;
     size_t n_objects;
     size_t n_static_objects;
-    WorldObject desk;
-    WorldObject cover;
-    WorldObject pages;
+    float light_intensity[4];
+    float light_intensity_delta;
+    bool desk_lamp_on;
     Page left_page;
     Page turning_page;
     Page right_page;
@@ -47,7 +47,7 @@ size_t obj_index(const Scene* scene, char const* object_id);
 /**
  * Set the lighting of the scene.
  */
-void set_lighting();
+void set_lighting(const Scene* scene);
 
 /**
  * Set the current material.

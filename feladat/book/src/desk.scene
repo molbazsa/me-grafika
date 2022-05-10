@@ -39,7 +39,7 @@ object left_page
 model assets/models/page.obj
 material ambient 1.0 1.0 1.0
 material diffuse 1.0 1.0 1.0
-material specular 0.0 0.0 0.0
+material specular 0.2 0.2 0.2
 material shininess 0.0
 orientation -90.0 0.0 0.0
 position 0.0 0.0 0.0
@@ -50,7 +50,7 @@ object turning_page
 model assets/models/page.obj
 material ambient 1.0 1.0 1.0
 material diffuse 1.0 1.0 1.0
-material specular 0.0 0.0 0.0
+material specular 0.2 0.2 0.2
 material shininess 0.0
 orientation -90.0 0.0 0.0
 position 0.0 0.0 0.0
@@ -61,7 +61,7 @@ object right_page
 model assets/models/page.obj
 material ambient 1.0 1.0 1.0
 material diffuse 1.0 1.0 1.0
-material specular 0.0 0.0 0.0
+material specular 0.2 0.2 0.2
 material shininess 0.0
 orientation -90.0 0.0 0.0
 position 0.0 0.0 0.0

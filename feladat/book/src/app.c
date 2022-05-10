@@ -194,6 +194,7 @@ void handle_app_events(App* app) {
     static int mouse_y = 0;
     double const mouse_sensitivity = 0.5;
     assert(mouse_sensitivity <= 1);
+    float const LIGHT_INTENSITY_DELTA = 0.5;
     int x;
     int y;
 
@@ -235,6 +236,17 @@ void handle_app_events(App* app) {
                             exit_drawing(app);
                         }
                         break;
+                    case SDL_SCANCODE_1:
+                        app->scene.light_intensity_delta =
+                            -LIGHT_INTENSITY_DELTA;
+                        break;
+                    case SDL_SCANCODE_2:
+                        app->scene.light_intensity_delta =
+                            LIGHT_INTENSITY_DELTA;
+                        break;
+                    case SDL_SCANCODE_L:
+                        app->scene.desk_lamp_on = !app->scene.desk_lamp_on;
+                        break;
                     default:
                         break;
                 }
@@ -252,6 +264,10 @@ void handle_app_events(App* app) {
                     case SDL_SCANCODE_SPACE:
                     case SDL_SCANCODE_LSHIFT:
                         set_camera_vertical_speed(&(app->camera), 0);
+                        break;
+                    case SDL_SCANCODE_1:
+                    case SDL_SCANCODE_2:
+                        app->scene.light_intensity_delta = 0;
                         break;
                     default:
                         break;

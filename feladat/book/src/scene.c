@@ -36,6 +36,13 @@ void init_scene(Scene* scene) {
     scene->grass_texture = load_texture("assets/textures/grass.jpg");
     scene->skybox_texture = load_texture("assets/textures/skybox.jpg");
 
+    scene->light_intensity[0] = 0.5f;
+    scene->light_intensity[1] = 0.5f;
+    scene->light_intensity[2] = 0.5f;
+    scene->light_intensity[3] = 1.0f;
+    scene->light_intensity_delta = 0;
+    scene->desk_lamp_on = false;
+
     scene->n_pages = 3;
     scene->pages_turned = 0;
 
@@ -69,8 +76,7 @@ void set_object_props(Scene* scene,
                       SceneFileParam param) {
     switch (command) {
         case model_command:
-            load_model(&(scene->objects[current_obj].model),
-                        param.filename);
+            load_model(&(scene->objects[current_obj].model), param.filename);
             break;
         case texture_command:
             scene->objects[current_obj].texture_id =
@@ -78,32 +84,23 @@ void set_object_props(Scene* scene,
             break;
 
         case mat_ambient_command:
-            scene->objects[current_obj].material.ambient.red =
-                param.vector.x;
-            scene->objects[current_obj].material.ambient.green =
-                param.vector.y;
-            scene->objects[current_obj].material.ambient.blue =
-                param.vector.z;
+            scene->objects[current_obj].material.ambient.red = param.vector.x;
+            scene->objects[current_obj].material.ambient.green = param.vector.y;
+            scene->objects[current_obj].material.ambient.blue = param.vector.z;
             break;
         case mat_diffuse_command:
-            scene->objects[current_obj].material.diffuse.red =
-                param.vector.x;
-            scene->objects[current_obj].material.diffuse.green =
-                param.vector.y;
-            scene->objects[current_obj].material.diffuse.blue =
-                param.vector.z;
+            scene->objects[current_obj].material.diffuse.red = param.vector.x;
+            scene->objects[current_obj].material.diffuse.green = param.vector.y;
+            scene->objects[current_obj].material.diffuse.blue = param.vector.z;
             break;
         case mat_specular_command:
-            scene->objects[current_obj].material.specular.red =
-                param.vector.x;
+            scene->objects[current_obj].material.specular.red = param.vector.x;
             scene->objects[current_obj].material.specular.green =
                 param.vector.y;
-            scene->objects[current_obj].material.specular.blue =
-                param.vector.z;
+            scene->objects[current_obj].material.specular.blue = param.vector.z;
             break;
         case mat_shininess_command:
-            scene->objects[current_obj].material.shininess =
-                param.float_val;
+            scene->objects[current_obj].material.shininess = param.float_val;
             break;
 
         case orientation_command:
@@ -246,16 +243,37 @@ size_t obj_index(const Scene* scene, char const* object_id) {
     return index;
 }
 
-void set_lighting() {
+void set_lighting(const Scene* scene) {
     float ambient_light[] = {0.2f, 0.2f, 0.2f, 1.0f};
-    float diffuse_light[] = {1.0f, 1.0f, 1.0, 1.0f};
     float specular_light[] = {0.0f, 0.0f, 0.0f, 1.0f};
     float position[] = {0.0f, 0.0f, 10.0f, 1.0f};
 
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_light);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_light);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, scene->light_intensity);
     glLightfv(GL_LIGHT0, GL_SPECULAR, specular_light);
     glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+    float spot_ambient[] = {0.8f, 0.8f, 0.8f, 1.0f};
+    float spot_diffuse[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    float spot_specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    float spot_position[] = {-0.735f, 0.335f, 0.9f, 1.0f};
+    float spot_direction[] = {0.735f, -0.335f, -0.9f, 1.0f};
+
+    if (scene->desk_lamp_on) {
+        glLightfv(GL_LIGHT1, GL_AMBIENT, spot_ambient);
+        glLightfv(GL_LIGHT1, GL_DIFFUSE, spot_diffuse);
+        glLightfv(GL_LIGHT1, GL_SPECULAR, spot_specular);
+        glLightfv(GL_LIGHT1, GL_POSITION, spot_position);
+        glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot_direction);
+        glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 15);
+        glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 0.5);
+        glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1.0);
+        glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.22);
+        glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.2);
+        glEnable(GL_LIGHT1);
+    } else {
+        glDisable(GL_LIGHT1);
+    }
 }
 
 void set_material(const Material* material) {
@@ -298,10 +316,24 @@ void update_scene(Scene* scene, double time) {
                 scene->drawing_textures[scene->pages_turned + 1];
         }
     }
+
+    scene->light_intensity[0] += scene->light_intensity_delta * time;
+    scene->light_intensity[1] += scene->light_intensity_delta * time;
+    scene->light_intensity[2] += scene->light_intensity_delta * time;
+
+    if (scene->light_intensity[0] < 0) {
+        scene->light_intensity[0] = 0.0;
+        scene->light_intensity[1] = 0.0;
+        scene->light_intensity[2] = 0.0;
+    } else if (scene->light_intensity[0] > 1) {
+        scene->light_intensity[0] = 1.0;
+        scene->light_intensity[1] = 1.0;
+        scene->light_intensity[2] = 1.0;
+    }
 }
 
 void render_scene(const Scene* scene) {
-    set_lighting();
+    set_lighting(scene);
 
     // draw_axes();
 
