@@ -32,8 +32,10 @@ typedef struct Scene {
     size_t pages_turned;
     SDL_Surface* dot;
     GLuint* drawing_textures;
+    bool pixelated;
     GLuint grass_texture;
     GLuint skybox_texture;
+    GLuint help_texture;
 } Scene;
 
 /**

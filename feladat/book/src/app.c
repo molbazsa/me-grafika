@@ -203,7 +203,13 @@ void handle_app_events(App* app) {
             case SDL_KEYDOWN:
                 switch (event.key.keysym.scancode) {
                     case SDL_SCANCODE_ESCAPE:
-                        app->is_running = false;
+                        if (app->is_drawing) {
+                            exit_drawing(app);
+                        } else if (app->camera.is_preview_visible) {
+                            app->camera.is_preview_visible = false;
+                        } else {
+                            app->is_running = false;
+                        }
                         break;
                     case SDL_SCANCODE_W:
                         set_camera_speed(&(app->camera), 1);
@@ -236,6 +242,9 @@ void handle_app_events(App* app) {
                             exit_drawing(app);
                         }
                         break;
+                    case SDL_SCANCODE_X:
+                        app->scene.pixelated = !app->scene.pixelated;
+                        break;
                     case SDL_SCANCODE_1:
                         app->scene.light_intensity_delta =
                             -LIGHT_INTENSITY_DELTA;
@@ -247,6 +256,13 @@ void handle_app_events(App* app) {
                     case SDL_SCANCODE_L:
                         app->scene.desk_lamp_on = !app->scene.desk_lamp_on;
                         break;
+                    case SDL_SCANCODE_F1:
+                        app->camera.is_preview_visible =
+                            !app->camera.is_preview_visible;
+                        break;
+                    case SDL_SCANCODE_R:
+                        destroy_app(app);
+                        init_app(app, app->window_width, app->window_height);
                     default:
                         break;
                 }
@@ -334,20 +350,21 @@ void render_app(App* app) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
 
-    glPushMatrix();
-
-    if (app->is_drawing) {
-        set_parallel_view();
+    if (app->camera.is_preview_visible) {
+        glBindTexture(GL_TEXTURE_2D, app->scene.help_texture);
+        show_texture_preview();
     } else {
-        set_view(&(app->camera));
+        glPushMatrix();
+
+        if (app->is_drawing) {
+            set_parallel_view();
+        } else {
+            set_view(&(app->camera));
+        }
+
+        render_scene(&(app->scene));
+        glPopMatrix();
     }
-
-    render_scene(&(app->scene));
-    glPopMatrix();
-
-    // if (app->camera.is_preview_visible) {
-    //   show_texture_preview();
-    // }
 
     SDL_GL_SwapWindow(app->window);
 }

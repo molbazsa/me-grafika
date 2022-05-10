@@ -35,6 +35,7 @@ void init_scene(Scene* scene) {
 
     scene->grass_texture = load_texture("assets/textures/grass.jpg");
     scene->skybox_texture = load_texture("assets/textures/skybox.jpg");
+    scene->help_texture = load_texture("assets/textures/help.jpg");
 
     scene->light_intensity[0] = 0.5f;
     scene->light_intensity[1] = 0.5f;
@@ -59,6 +60,8 @@ void init_scene(Scene* scene) {
     for (size_t i = 0; i < scene->n_pages + 2; i++) {
         scene->drawing_textures[i] = load_texture("assets/textures/page.jpg");
     }
+
+    scene->pixelated = false;
 
     scene->left_page.object->texture_id =
         scene->drawing_textures[scene->pages_turned];
@@ -478,9 +481,29 @@ void render_skybox(const Scene* scene) {
 
 void render_pages(const Scene* scene) {
     if (scene->turning_page.turn_direction != 0) {
+        glBindTexture(GL_TEXTURE_2D, scene->turning_page.object->texture_id);
+        if (scene->pixelated) {
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        } else {
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        }
         render_object(scene->turning_page.object);
     }
+
+    glBindTexture(GL_TEXTURE_2D, scene->left_page.object->texture_id);
+    if (scene->pixelated) {
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    } else {
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
     render_object(scene->left_page.object);
+
+    glBindTexture(GL_TEXTURE_2D, scene->right_page.object->texture_id);
+    if (scene->pixelated) {
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    } else {
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
     render_object(scene->right_page.object);
 }
 
@@ -534,6 +557,12 @@ void draw_axes() {
 }
 
 void destroy_scene(Scene* scene) {
+    for (size_t i = 0; i < scene->n_objects; i++) {
+        free(scene->object_ids[i]);
+    }
+    free(scene->object_ids);
+    free(scene->objects);
+    free(scene->bounding_boxes);
     free(scene->drawing_textures);
     SDL_FreeSurface(scene->dot);
 }
